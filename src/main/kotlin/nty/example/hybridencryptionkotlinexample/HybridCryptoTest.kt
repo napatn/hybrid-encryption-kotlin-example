@@ -16,9 +16,7 @@ import java.security.KeyFactory
 import java.security.PrivateKey
 import java.security.PublicKey
 import javax.crypto.KeyGenerator
-import java.security.interfaces.RSAPrivateKey
 import java.security.spec.PKCS8EncodedKeySpec
-import java.security.interfaces.RSAPublicKey
 import java.security.spec.X509EncodedKeySpec
 import java.security.Security
 
@@ -29,20 +27,27 @@ class HybridController(val cryptoHelper: HybridCryptoHelper) {
 
     @PostMapping("/encrypt")
     fun encrypt(@RequestBody request: EncryptRequest): EncryptResponse {
-        return EncryptResponse(cipherText = request.plainText,
-                cipherKey = request.plainKey)
+        val cipherText = cryptoHelper.encryptAESGCMToBase64(request.plainText!!, request.plainKey!!)
+        val encryptedKey = cryptoHelper.encryptBase64RSA(request.plainKey!!, cryptoHelper.convertStringToBase64PublicKey(Keys.RSA_PUBLIC_1024.value)!!)
+
+        return EncryptResponse(cipherText = cipherText,
+                cipherKey = encryptedKey)
     }
 
     @PostMapping("/decrypt")
     fun decrypt(@RequestBody request: DecryptRequest): DecryptResponse {
-        return DecryptResponse(plainText = request.cipherText,
-                plainKey = request.cipherKey)
+        val plainKey = cryptoHelper.decryptBase64RSA(request.cipherKey!!, cryptoHelper.convertStringToBase64PrivateKey(Keys.RSA_PRIVATE_1024.value)!!)
+        val plainText = cryptoHelper.decryptAESGCMFromBase64(request.cipherText!!, plainKey!!)
+
+        return DecryptResponse(plainText = plainText,
+                plainKey = plainKey)
     }
 
     @GetMapping("/key")
     fun generateAESKey(): GenerateKeyResponse {
         val plainKey = cryptoHelper.generateAESKey()
         val encryptedKey = cryptoHelper.encryptBase64RSA(plainKey, cryptoHelper.convertStringToBase64PublicKey(Keys.RSA_PUBLIC_1024.value)!!)
+
         return GenerateKeyResponse(plainKey = plainKey,
                 rsaEncryptedKey = encryptedKey)
     }
@@ -62,7 +67,7 @@ class HybridCryptoHelper {
         Security.addProvider(BouncyCastleProvider())
     }
 
-    private fun getAESSecretKeyFromString(encodedKey: String): SecretKey {
+    fun getAESSecretKeyFromString(encodedKey: String): SecretKey {
         val decodedKey = Base64.getDecoder().decode(encodedKey)
         return SecretKeySpec(decodedKey, 0, decodedKey.size, "AES")
     }
@@ -109,20 +114,6 @@ class HybridCryptoHelper {
         }
     }
 
-    fun encryptHexRSA(password: String, key: Key): String? {
-        try {
-            val input = password.toByteArray(charset("UTF-8"))
-            val cipher = Cipher.getInstance(RSA_INSTANCE, "BC")
-
-            cipher.init(Cipher.ENCRYPT_MODE, key)
-            val cipherText = cipher.doFinal(input)
-            return byte2Hex(cipherText)
-        } catch (e: Exception) {
-            return null
-        }
-
-    }
-
     fun encryptBase64RSA(plainText: String, key: Key): String? {
         try {
             val input = plainText.toByteArray(charset("UTF-8"))
@@ -131,20 +122,6 @@ class HybridCryptoHelper {
             cipher.init(Cipher.ENCRYPT_MODE, key)
             val cipherText = cipher.doFinal(input)
             return Base64.getEncoder().encodeToString(cipherText)
-        } catch (e: Exception) {
-            return null
-        }
-    }
-
-
-    fun decryptHexRSA(encryptedTxt: String, key: Key): String? {
-        try {
-            val cipher = Cipher.getInstance(RSA_INSTANCE, "BC")
-
-            cipher.init(Cipher.DECRYPT_MODE, key)
-            val plainText = cipher.doFinal(hex2Byte(encryptedTxt))
-
-            return String(plainText, charset("UTF-8"))
         } catch (e: Exception) {
             return null
         }
@@ -174,16 +151,6 @@ class HybridCryptoHelper {
 
     }
 
-    fun convertStringToHexPublicKey(publicKey: String): PublicKey? {
-        try {
-            val keyFactory = KeyFactory.getInstance("RSA", "BC")
-            val publicKeySpec = X509EncodedKeySpec(hex2Byte(publicKey))
-            return keyFactory.generatePublic(publicKeySpec)
-        } catch (e: Exception) {
-            return null
-        }
-
-    }
 
     fun convertStringToBase64PrivateKey(privateKey: String): PrivateKey? {
         try {
@@ -196,18 +163,6 @@ class HybridCryptoHelper {
 
     }
 
-    fun convertStringToHexPrivateKey(privateKey: String): PrivateKey? {
-        try {
-            val keyFactory = KeyFactory.getInstance("RSA", "BC")
-            val privateKeySpec = PKCS8EncodedKeySpec(hex2Byte(privateKey))
-            return keyFactory.generatePrivate(privateKeySpec)
-        } catch (e: Exception) {
-            return null
-        }
-
-    }
-
-
     private fun encodedBase64KeySpec(publicKey: String): ByteArray {
         return Base64.getDecoder().decode(publicKey)
     }
@@ -218,34 +173,6 @@ class HybridCryptoHelper {
 
     private fun decodedBase64EncryptedText(encryptedTxt: String): ByteArray {
         return Base64.getDecoder().decode(encryptedTxt)
-    }
-
-
-    private fun byte2Hex(src_byte: ByteArray): String {
-        val sb = StringBuffer()
-        for (i in src_byte.indices) {
-            var temp = Integer.toHexString(src_byte[i].toInt())
-            if (temp.length > 2) {
-                temp = temp.substring(temp.length - 2, temp.length)
-            } else if (temp.length < 2) {
-                temp = "0$temp"
-            }
-            sb.append(temp)
-        }
-        return sb.toString().trim { it <= ' ' }.toLowerCase()
-    }
-
-    private fun hex2Byte(src_hex: String): ByteArray {
-        val des_byte = ByteArray(src_hex.length / 2)
-        var i = 0
-        var j = 0
-        while (i < src_hex.length) {
-            des_byte[j] = Integer.parseInt(src_hex.substring(i, i + 2),
-                    16).toByte()
-            i += 2
-            j++
-        }
-        return des_byte
     }
 }
 
