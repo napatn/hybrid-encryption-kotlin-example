@@ -80,6 +80,13 @@ class HybridCryptoHelper {
     }
 }
 
+enum class Keys(val value: String) {
+//    generated using this online tool
+//    https://www.devglan.com/online-tools/rsa-encryption-decryption
+    RSA_PUBLIC_1024("MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCSAsbTSVBfsbWfki1iop2LGCI+70UWaXoWhzcVoazg/jblSx33vxQC4kdPqJ3RugJ+od/bq7M90l7Wm/FGH0LmnOn/awusnDFOQCRG2S60bsqmlmJthvbPXtRaMuf8MLxzEbXvy7+AjG42tIqoEmOHzJexrfBS2NCPACWklTO9bwIDAQAB"),
+    RSA_PRIVATE_1024("MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAJICxtNJUF+xtZ+SLWKinYsYIj7vRRZpehaHNxWhrOD+NuVLHfe/FALiR0+ondG6An6h39ursz3SXtab8UYfQuac6f9rC6ycMU5AJEbZLrRuyqaWYm2G9s9e1Foy5/wwvHMRte/Lv4CMbja0iqgSY4fMl7Gt8FLY0I8AJaSVM71vAgMBAAECgYB5tN7Ol7nrSlI+ZLZ4FVyE6OUC2KcZ+2nNBYChA1b7ZGuVzXt5W0ju7nbKq56Bhy81JvFWRlTuH0D2Wp5O+RflqCTAVTayWPqcwVLgBQNiuJ4bTaTaoVrpaeyEWhQhjxJLIHrasI/bnpPOMvSLnWDHCh8jXNcsZfuxVjpj3kw6gQJBAMmqqTr3eDrhgLXNdX36ASPRK0N3+Oh/Ta5rmA+AdGY7yqOJnXN6zANa1pzX/iag0ASuNWezx33uF5lQdky55zECQQC5WW1sH6Qe0Z9Vl7AVoJj+YPROGP99d+y82MlOMmitmTjnUAQWWWFL4EXfyZ1CUrIuawZjKrZLWDm4xKzm8gafAkARpCk7rExLMlDVFo0RoR4aaQDU3RjcFc7Q1D6wFHeaPd7DIZWxdWuFW5vsioSEEos/7ZFkafiojnxn//7pRVXxAkAmcjBKTz3hzqV4QaCau9dAXKgQUwsb4XZPrcAD4lzoNXIiOOzAHgYakQitZMqj6TdgfX6zrzZk5oYCl3kt5mINAkEAnuk9H2/mLGIIdsZb09FLnHlPljTOCKCM6es72XbELd9hiD/nzu58ho91CJnVK1BD8AlyS9jUqmgTxaSQ8SXqhg=="),
+}
+
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy::class)
 data class EncryptRequestModel(val plainText: String? = null,
                                val plainKey: String? = null)
