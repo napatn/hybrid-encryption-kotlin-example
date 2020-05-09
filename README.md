@@ -4,3 +4,6 @@ Below is the list of online tools used
 
 1. RSA Key Generation, Encryption, Decryption
 https://www.devglan.com/online-tools/rsa-encryption-decryption
+
+2. Base64 String Generator for AES Key
+https://generate.plus/en/base64
