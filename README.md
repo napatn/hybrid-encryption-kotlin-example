@@ -7,3 +7,9 @@ https://www.devglan.com/online-tools/rsa-encryption-decryption
 
 2. Base64 String Generator for AES Key
 https://generate.plus/en/base64
+
+3. AES encryption
+https://gchq.github.io/CyberChef/
+
+4. Converting HEX to Base64
+https://base64.guru/converter/encode/hex
